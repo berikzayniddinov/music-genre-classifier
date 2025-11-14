@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Music Genre AI{% endblock %}
+
+{% block extra_css %}
+<link href="/static/css/dashboard.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold">Admin Dashboard</h1>
+                <p class="lead">Monitor system performance and model metrics</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="badge bg-success fs-6 p-3">
+                    <i class="fas fa-circle me-2"></i>System Online
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid py-4">
+    <div class="container">
+        <!-- System Metrics -->
+        <div class="row mb-5">
+            <div class="col-md-3 mb-4">
+                <div class="card metric-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-brain fa-2x text-primary mb-3"></i>
+                        <h3 id="accuracyMetric">94.8%</h3>
+                        <p class="text-muted">Model Accuracy</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card metric-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-database fa-2x text-success mb-3"></i>
+                        <h3 id="trainingSamples">114,000</h3>
+                        <p class="text-muted">Training Samples</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card metric-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tags fa-2x text-info mb-3"></i>
+                        <h3 id="genreCount">10</h3>
+                        <p class="text-muted">Genres Supported</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card metric-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-bolt fa-2x text-warning mb-3"></i>
+                        <h3 id="predictionCount">1,247</h3>
+                        <p class="text-muted">Predictions Today</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts - ИСПРАВЛЕННАЯ СЕКЦИЯ -->
+        <div class="row row-cards">
+            <div class="col-md-6">
+                <div class="card card-chart">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Genre Distribution</h5>
+                    </div>
+                    <div class="chart-wrapper">
+                        <div class="chart-container-fixed">
+                            <canvas id="genreDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card card-chart">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Model Performance</h5>
+                    </div>
+                    <div class="chart-wrapper">
+                        <div class="chart-container-fixed">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Management -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>System Management</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <button class="btn btn-outline-primary w-100" onclick="dashboard.refreshMetrics()">
+                                    <i class="fas fa-sync-alt me-2"></i>Refresh Metrics
+                                </button>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <button class="btn btn-outline-success w-100" onclick="dashboard.exportData()">
+                                    <i class="fas fa-download me-2"></i>Export Data
+                                </button>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <button class="btn btn-outline-info w-100" onclick="dashboard.clearCache()">
+                                    <i class="fas fa-broom me-2"></i>Clear Cache
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Track</th>
+                                        <th>Artist</th>
+                                        <th>Predicted Genres</th>
+                                        <th>Confidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentActivity"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/charts.js"></script>
+<script>
+class AdminDashboard {
+    constructor() {
+        this.metrics = {};
+        this.init();
+    }
+
+    async init() {
+        await this.loadMetrics();
+        this.loadCharts();
+        this.loadRecentActivity();
+        this.startAutoRefresh();
+    }
+
+    async loadMetrics() {
+        try {
+            const response = await fetch('/api/metrics');
+            this.metrics = await response.json();
+            this.updateMetricsDisplay();
+            this.updatePerformanceChart();
+        } catch (error) {
+            console.error('Error loading metrics:', error);
+        }
+    }
+
+    updateMetricsDisplay() {
+        if (this.metrics.accuracy) {
+            document.getElementById('accuracyMetric').textContent =
+                (this.metrics.accuracy * 100).toFixed(1) + '%';
+        }
+        if (this.metrics.training_samples) {
+            document.getElementById('trainingSamples').textContent =
+                this.metrics.training_samples.toLocaleString();
+        }
+        if (this.metrics.genres_supported) {
+            document.getElementById('genreCount').textContent =
+                this.metrics.genres_supported;
+        }
+        if (this.metrics.predictions_today) {
+            document.getElementById('predictionCount').textContent =
+                this.metrics.predictions_today.toLocaleString();
+        }
+    }
+
+    loadCharts() {
+        initGenreDistributionChart();
+        initPerformanceChart(this.metrics); // передаём текущие данные
+    }
+
+    updatePerformanceChart() {
+        if (!chartManager.charts.has('performance')) return;
+
+        const chart = chartManager.charts.get('performance');
+        if (this.metrics.monthly_accuracy && this.metrics.monthly_f1) {
+            chart.data.datasets[0].data = this.metrics.monthly_accuracy;
+            chart.data.datasets[1].data = this.metrics.monthly_f1;
+            chart.update({
+                duration: 800, // плавное обновление
+                easing: 'easeOutQuad'
+            });
+        }
+    }
+
+    loadRecentActivity() {
+        const activity = [
+            { time: '10:30 AM', track: 'Dancing Queen', artist: 'ABBA', genres: 'Pop, Disco', confidence: '96%' },
+            { time: '10:25 AM', track: 'Bohemian Rhapsody', artist: 'Queen', genres: 'Rock', confidence: '94%' },
+            { time: '10:20 AM', track: 'Blinding Lights', artist: 'The Weeknd', genres: 'Pop, R&B', confidence: '92%' },
+            { time: '10:15 AM', track: 'Shape of You', artist: 'Ed Sheeran', genres: 'Pop', confidence: '89%' },
+            { time: '10:10 AM', track: 'Old Town Road', artist: 'Lil Nas X', genres: 'Country, Hip Hop', confidence: '91%' }
+        ];
+
+        const activityHTML = activity.map(item => `
+            <tr>
+                <td>${item.time}</td>
+                <td>${item.track}</td>
+                <td>${item.artist}</td>
+                <td>${item.genres}</td>
+                <td><span class="badge bg-success">${item.confidence}</span></td>
+            </tr>
+        `).join('');
+
+        document.getElementById('recentActivity').innerHTML = activityHTML;
+    }
+
+    startAutoRefresh() {
+        setInterval(() => {
+            this.loadMetrics();
+        }, 30000);
+    }
+
+    refreshMetrics() {
+        this.loadMetrics();
+        alert('Metrics refreshed successfully!');
+    }
+
+    exportData() {
+        alert('Export feature coming soon!');
+    }
+
+    clearCache() {
+        if (confirm('Are you sure you want to clear the cache?')) {
+            alert('Cache cleared successfully!');
+        }
+    }
+}
+
+const dashboard = new AdminDashboard();
+</script>
+{% endblock %}

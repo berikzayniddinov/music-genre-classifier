@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Music Recommendations - Music Genre AI{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold text-white">Music Recommendations</h1>
+                <p class="lead text-white">Discover new music based on your favorite genres and audio preferences</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recommendation Form -->
+<section class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-magic me-2"></i>Get Personalized Recommendations
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="recommendationForm">
+                        <div class="mb-4">
+                            <h5>Preferred Genres</h5>
+                            <div class="row" id="genreSelection">
+                                {% for genre in ['pop', 'rock', 'hip_hop', 'jazz', 'electronic', 'classical', 'r_b', 'country', 'metal', 'folk'] %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input genre-checkbox" type="checkbox"
+                                               value="{{ genre }}" id="genre_{{ genre }}">
+                                        <label class="form-check-label" for="genre_{{ genre }}">
+                                            {{ genre.replace('_', ' ').title() }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Energy Level</label>
+                                    <input type="range" class="form-range" id="energyLevel"
+                                           min="0" max="1" step="0.1" value="0.5">
+                                    <div class="d-flex justify-content-between">
+                                        <small>Calm</small>
+                                        <small>Energetic</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Danceability</label>
+                                    <input type="range" class="form-range" id="danceabilityLevel"
+                                           min="0" max="1" step="0.1" value="0.5">
+                                    <div class="d-flex justify-content-between">
+                                        <small>Low</small>
+                                        <small>High</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mood</label>
+                            <select class="form-select" id="moodSelection">
+                                <option value="happy">Happy/Upbeat</option>
+                                <option value="chill">Chill/Relaxed</option>
+                                <option value="focused">Focused/Productive</option>
+                                <option value="energetic">Energetic/Workout</option>
+                                <option value="romantic">Romantic</option>
+                                <option value="melancholic">Melancholic</option>
+                            </select>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-info btn-lg">
+                                <i class="fas fa-sparkles me-2"></i>Get Recommendations
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Results Section -->
+                    <div id="recommendationResults" class="mt-4" style="display: none;">
+                        <h5 class="text-center mb-4">Recommended Tracks</h5>
+                        <div id="tracksList" class="row">
+                            <!-- Recommendations will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Genres Section -->
+<section class="container my-5">
+    <h2 class="text-center mb-5">Explore Popular Genres</h2>
+    <div class="row">
+        {% for genre in ['pop', 'rock', 'electronic', 'hip_hop', 'jazz'] %}
+        <div class="col-md-4 mb-4">
+            <div class="card genre-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-music fa-3x text-primary mb-3"></i>
+                    <h5>{{ genre.replace('_', ' ').title() }}</h5>
+                    <p class="text-muted">Discover the best {{ genre.replace('_', ' ') }} tracks</p>
+                    <button class="btn btn-outline-primary select-genre" data-genre="{{ genre }}">
+                        Select Genre
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class RecommendationApp {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        // Form submission
+        const form = document.getElementById('recommendationForm');
+        if (form) {
+            form.addEventListener('submit', (e) => this.handleRecommendation(e));
+        }
+
+        // Genre selection buttons
+        document.querySelectorAll('.select-genre').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const genre = e.target.dataset.genre;
+                this.selectSingleGenre(genre);
+            });
+        });
+    }
+
+    selectSingleGenre(genre) {
+        // Uncheck all genres
+        document.querySelectorAll('.genre-checkbox').forEach(cb => {
+            cb.checked = false;
+        });
+
+        // Check the selected genre
+        const checkbox = document.getElementById(`genre_${genre}`);
+        if (checkbox) {
+            checkbox.checked = true;
+        }
+
+        // Scroll to form
+        document.getElementById('recommendationForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async handleRecommendation(e) {
+        e.preventDefault();
+
+        const selectedGenres = Array.from(document.querySelectorAll('.genre-checkbox:checked'))
+            .map(cb => cb.value);
+
+        if (selectedGenres.length === 0) {
+            alert('Please select at least one genre');
+            return;
+        }
+
+        // Show loading state
+        const resultsDiv = document.getElementById('recommendationResults');
+        const tracksList = document.getElementById('tracksList');
+
+        tracksList.innerHTML = `
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Finding recommendations...</p>
+            </div>
+        `;
+        resultsDiv.style.display = 'block';
+
+        // Simulate API call (replace with actual API endpoint)
+        setTimeout(() => {
+            this.displayRecommendations(selectedGenres);
+        }, 2000);
+    }
+
+    displayRecommendations(genres) {
+        const tracksList = document.getElementById('tracksList');
+
+        // Mock recommendations based on genres
+        const mockTracks = {
+            'pop': [
+                { name: "Dance Tonight", artist: "Pop Star", confidence: 0.95 },
+                { name: "Summer Vibes", artist: "Radio Hit", confidence: 0.88 }
+            ],
+            'rock': [
+                { name: "Guitar Hero", artist: "Rock Band", confidence: 0.92 },
+                { name: "Mountain High", artist: "Alternative Rock", confidence: 0.85 }
+            ],
+            'electronic': [
+                { name: "Digital Dreams", artist: "DJ Electron", confidence: 0.96 },
+                { name: "Neon Lights", artist: "Synth Wave", confidence: 0.89 }
+            ],
+            'hip_hop': [
+                { name: "Urban Flow", artist: "MC Rhyme", confidence: 0.91 },
+                { name: "Street Beats", artist: "Hip Hop Collective", confidence: 0.87 }
+            ],
+            'jazz': [
+                { name: "Midnight Jazz", artist: "Smooth Quartet", confidence: 0.94 },
+                { name: "Blue Notes", artist: "Jazz Ensemble", confidence: 0.86 }
+            ]
+        };
+
+        let allTracks = [];
+        genres.forEach(genre => {
+            if (mockTracks[genre]) {
+                allTracks = allTracks.concat(mockTracks[genre]);
+            }
+        });
+
+        // Shuffle and limit to 6 tracks
+        allTracks = this.shuffleArray(allTracks).slice(0, 6);
+
+        const tracksHTML = allTracks.map(track => `
+            <div class="col-md-6 mb-3">
+                <div class="card track-card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">${track.name}</h6>
+                        <p class="card-text text-muted">${track.artist}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary">${(track.confidence * 100).toFixed(0)}% Match</span>
+                            <button class="btn btn-sm btn-outline-primary">Analyze</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        tracksList.innerHTML = tracksHTML;
+    }
+
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new RecommendationApp();
+});
+</script>
+
+<style>
+.genre-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.genre-card:hover {
+    transform: translateY(-5px);
+}
+
+.track-card {
+    border-left: 4px solid #667eea;
+    transition: all 0.3s ease;
+}
+
+.track-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock %}

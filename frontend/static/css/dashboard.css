@@ -1,0 +1,252 @@
+/* Dashboard-specific styles */
+
+.dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+}
+
+.metric-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.metric-card .card-body {
+    padding: 2rem 1rem;
+}
+
+.metric-card h3 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.metric-card .text-muted {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Chart containers */
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin: 1rem 0;
+}
+
+/* Table styles */
+.table th {
+    border-top: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    color: #6c757d;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Status indicators */
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.status-online {
+    background-color: #28a745;
+}
+
+.status-offline {
+    background-color: #dc3545;
+}
+
+.status-warning {
+    background-color: #ffc107;
+}
+
+/* Button styles */
+.btn-dashboard {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-dashboard:hover {
+    transform: translateY(-2px);
+}
+
+/* Card enhancements */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background: white;
+    border-bottom: 2px solid #f8f9fa;
+    border-radius: 15px 15px 0 0 !important;
+    padding: 1.25rem 1.5rem;
+}
+
+.card-header h5 {
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Progress bars */
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.progress-bar {
+    border-radius: 4px;
+}
+
+/* Badge styles */
+.badge {
+    font-size: 0.7rem;
+    padding: 0.4em 0.8em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .metric-card .card-body {
+        padding: 1.5rem 1rem;
+    }
+
+    .metric-card h3 {
+        font-size: 2rem;
+    }
+
+    .chart-container {
+        height: 250px;
+    }
+
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+}
+
+/* Loading animations */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.loading-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Custom scrollbar for tables */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Hover effects */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Metric card colors */
+.metric-card.primary {
+    border-left: 4px solid #007bff;
+}
+
+.metric-card.success {
+    border-left: 4px solid #28a745;
+}
+
+.metric-card.warning {
+    border-left: 4px solid #ffc107;
+}
+
+.metric-card.danger {
+    border-left: 4px solid #dc3545;
+}
+/* Исправления для карточек с графиками */
+.card-chart {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+    height: 100%;
+}
+
+.card-chart .chart-wrapper {
+    padding: 1.5rem;
+    height: 300px;
+    position: relative;
+}
+
+/* Фиксированная высота для контейнеров графиков */
+.chart-container-fixed {
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+/* Гарантируем правильное отображение canvas */
+.chart-container-fixed canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Убираем лишние отступы у карточек */
+.card-header {
+    background: white;
+    border-bottom: 2px solid #f8f9fa;
+    border-radius: 15px 15px 0 0 !important;
+    padding: 1.25rem 1.5rem;
+    margin: 0;
+}
+
+/* Исправляем структуру строк */
+.row-cards {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+}
+
+.row-cards > [class*="col-"] {
+    padding: 0 10px;
+    margin-bottom: 20px;
+}

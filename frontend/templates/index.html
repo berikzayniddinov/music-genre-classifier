@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Music Genre Classifier{% endblock %}
+
+<!-- Убираем extra_css блок, так как style.css уже подключен в base.html -->
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold text-white">AI Music Genre Classification</h1>
+                <p class="lead text-white">Advanced machine learning system for multi-label music genre prediction using SVM algorithm with 94.8% accuracy</p>
+                <div class="mt-4">
+                    <a href="#classifier" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-search me-2"></i>Analyze Music
+                    </a>
+                    <a href="/recommend" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-magic me-2"></i>Get Recommendations
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card glass-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-brain fa-5x text-primary mb-3"></i>
+                        <h4>Model Performance</h4>
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <div class="metric-card">
+                                    <h3 class="text-success">94.8%</h3>
+                                    <small>Accuracy</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-card">
+                                    <h3 class="text-info">114K+</h3>
+                                    <small>Tracks Analyzed</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Classifier Section -->
+<section id="classifier" class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-search me-2"></i>Music Genre Classifier
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="predictionForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Track Name *</label>
+                                    <input type="text" class="form-control" id="trackName" required
+                                           placeholder="Enter track name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Artists *</label>
+                                    <input type="text" class="form-control" id="artists" required
+                                           placeholder="Enter artist names">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Album Name</label>
+                            <input type="text" class="form-control" id="albumName"
+                                   placeholder="Enter album name (optional)">
+                        </div>
+
+                        <!-- Audio Features -->
+                        <h5 class="mt-4 mb-3">
+                            <i class="fas fa-sliders-h me-2"></i>Audio Features
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Danceability: <span id="danceabilityValue">0.5</span></label>
+                                    <input type="range" class="form-range" id="danceability"
+                                           min="0" max="1" step="0.01" value="0.5">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Energy: <span id="energyValue">0.5</span></label>
+                                    <input type="range" class="form-range" id="energy"
+                                           min="0" max="1" step="0.01" value="0.5">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Valence: <span id="valenceValue">0.5</span></label>
+                                    <input type="range" class="form-range" id="valence"
+                                           min="0" max="1" step="0.01" value="0.5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Tempo (BPM)</label>
+                                    <input type="number" class="form-control" id="tempo" value="120"
+                                           min="60" max="200" step="1">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Popularity: <span id="popularityValue">50</span></label>
+                                    <input type="range" class="form-range" id="popularity"
+                                           min="0" max="100" value="50">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Features -->
+                        <div class="accordion mt-4" id="advancedAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#advancedCollapse">
+                                        <i class="fas fa-cog me-2"></i>Advanced Audio Features
+                                    </button>
+                                </h2>
+                                <div id="advancedCollapse" class="accordion-collapse collapse"
+                                     data-bs-parent="#advancedAccordion">
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Speechiness</label>
+                                                    <input type="number" class="form-control" id="speechiness"
+                                                           value="0.05" step="0.01" min="0" max="1">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Acousticness</label>
+                                                    <input type="number" class="form-control" id="acousticness"
+                                                           value="0.1" step="0.01" min="0" max="1">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Instrumentalness</label>
+                                                    <input type="number" class="form-control" id="instrumentalness"
+                                                           value="0.0" step="0.01" min="0" max="1">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Liveness</label>
+                                                    <input type="number" class="form-control" id="liveness"
+                                                           value="0.1" step="0.01" min="0" max="1">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Loudness (dB)</label>
+                                                    <input type="number" class="form-control" id="loudness"
+                                                           value="-10.0" step="0.1" min="-60" max="0">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn">
+                                <i class="fas fa-brain me-2"></i>Analyze Genres
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Loading Spinner -->
+                    <div id="loadingSpinner" class="text-center mt-4" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Analyzing track features...</p>
+                    </div>
+
+                    <!-- Results Container -->
+                    <div id="resultsContainer" class="mt-4" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="container my-5">
+    <h2 class="text-center mb-5">How It Works</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-wave-square fa-3x text-primary mb-3"></i>
+                    <h5>Audio Analysis</h5>
+                    <p>Analyzes 12+ audio features including danceability, energy, tempo, and acoustic properties</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-network-wired fa-3x text-success mb-3"></i>
+                    <h5>Machine Learning</h5>
+                    <p>Uses SVM algorithm trained on 114,000+ tracks with 94.8% accuracy</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-tags fa-3x text-info mb-3"></i>
+                    <h5>Multi-Label Classification</h5>
+                    <p>Predicts multiple genres per track with confidence scores</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Убираем charts.js если он не существует -->
+<script>
+    // Update range values in real-time
+    document.getElementById('danceability').addEventListener('input', function() {
+        document.getElementById('danceabilityValue').textContent = this.value;
+    });
+    document.getElementById('energy').addEventListener('input', function() {
+        document.getElementById('energyValue').textContent = this.value;
+    });
+    document.getElementById('valence').addEventListener('input', function() {
+        document.getElementById('valenceValue').textContent = this.value;
+    });
+    document.getElementById('popularity').addEventListener('input', function() {
+        document.getElementById('popularityValue').textContent = this.value;
+    });
+</script>
+{% endblock %}

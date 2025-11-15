@@ -45,7 +45,7 @@ templates = Jinja2Templates(directory="frontend/templates")
 
 # Models and preprocessing
 MODEL = 'backend/models/svm_model.pkl'
-SCALER = None
+SCALER ='backend/models/svm_model.pkl'
 
 GENRE_LABELS = [
     "pop", "rock", "hip_hop", "jazz", "electronic",

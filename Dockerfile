@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Копируем backend и frontend
 COPY backend/app ./app
+COPY backend/models ./backend/models
 COPY frontend/templates ./frontend/templates
 COPY frontend/static ./frontend/static
 

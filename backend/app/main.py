@@ -44,7 +44,7 @@ app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 templates = Jinja2Templates(directory="frontend/templates")
 
 # Models and preprocessing
-MODEL = None
+MODEL = 'backend/models/svm_model.pkl'
 SCALER = None
 
 GENRE_LABELS = [
@@ -90,14 +90,12 @@ class BatchPredictionResponse(BaseModel):
     average_confidence: float
 
 
-# Load model on startup
 @app.on_event("startup")
 async def startup_event():
     global MODEL, SCALER
     try:
-        # Try to load model, but don't fail if not found for development
-        if os.path.exists('models/svm_model.pkl'):
-            MODEL = joblib.load('models/svm_model.pkl')
+        if os.path.exists('backend/models/svm_model.pkl'):
+            MODEL = joblib.load('backend/models/svm_model.pkl')
             logger.info("✅ SVM model loaded successfully")
         else:
             logger.warning("⚠️ Model file not found, running in demo mode")
@@ -109,7 +107,6 @@ async def startup_event():
             logger.warning("⚠️ Scaler not found, using default scaling")
     except Exception as e:
         logger.error(f"❌ Error loading model: {e}")
-        # Don't raise exception to allow demo mode
 
 
 # Frontend routes
